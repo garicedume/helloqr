@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
   Download, Globe, Wifi, Smartphone, FileText, Image as ImageIcon, 
@@ -13,7 +13,7 @@ import QRCodeCanvas from "../components/QRCodeCanvas";
 import LogoColorExtractor from "../components/LogoColorExtractor";
 import { COUNTRIES, checkEmailTypo } from "../utils/helpers";
 
-export default function CrearQRPage() {
+function CrearQRContent() {
   const [contentType, setContentType] = useState("url");
   const qrRef = useRef<HTMLDivElement>(null);
   
@@ -63,10 +63,7 @@ export default function CrearQRPage() {
   const [isGenerated, setIsGenerated] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // Inicialización del SDK de Paddle
   const paddle = usePaddle();
-
-  // Detección automática del parámetro de éxito para descarga automática
   const searchParams = useSearchParams();
 
   const executeRealDownload = useCallback(() => {
@@ -952,5 +949,18 @@ export default function CrearQRPage() {
 
       </div>
     </div>
+  );
+}
+
+// Componente principal de la página con el Suspense Boundary obligatorio que exige Next.js
+export default function CrearQRPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Loader2 className="w-8 h-8 text-[#A0BE1B] animate-spin" />
+      </div>
+    }>
+      <CrearQRContent />
+    </Suspense>
   );
 }
