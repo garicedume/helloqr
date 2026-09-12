@@ -63,10 +63,10 @@ export default function CrearQRPage() {
   const [isGenerated, setIsGenerated] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // Inicialización del SDK de Paddle para pagos rápidos globales
+  // Inicialización del SDK de Paddle
   const paddle = usePaddle();
 
-  // Detección automática del parámetro de éxito de pago en la URL
+  // Detección automática del parámetro de éxito para descarga automática
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -96,7 +96,6 @@ export default function CrearQRPage() {
       },
     });
 
-    // Evento de GA4 para medir intento de compra con Paddle
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag('event', 'begin_checkout_paddle', {
         currency: "USD",
@@ -149,7 +148,6 @@ export default function CrearQRPage() {
     setIsGenerating(true);
     setIsGenerated(false);
 
-    // Evento de GA4 para medir generación de QR
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag('event', 'generate_qr', {
         content_type: contentType,
@@ -167,7 +165,6 @@ export default function CrearQRPage() {
     const svgElement = qrRef.current?.querySelector("svg");
     const canvasElement = qrRef.current?.querySelector("canvas");
 
-    // Evento de GA4 para medir descargas
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag('event', 'download_qr', {
         format: selectedFormat,
@@ -274,7 +271,6 @@ export default function CrearQRPage() {
     }
   };
 
-  // Listado con descripciones limpias estilo SaaS profesional
   const contentTypesList = [
     { id: "url", name: "URL / Link", desc: "Sitio web, landing page, redes sociales, etc.", bgClass: "bg-gray-900 text-white", iconSvg: <Globe className="w-5 h-5" /> },
     { id: "pdf", name: "PDF", desc: "Comparte archivos PDF de forma directa.", bgClass: "bg-red-600 text-white", iconSvg: <FileText className="w-5 h-5" /> },
@@ -351,7 +347,6 @@ export default function CrearQRPage() {
   return (
     <div className="py-12 px-6 max-w-7xl mx-auto bg-gray-50/40 min-h-screen">
       
-      {/* ENCABEZADO LIMPIO Y PROFESIONAL */}
       <div className="max-w-3xl mb-10 select-none cursor-default">
         <p className="text-xs font-bold text-[#6E6E73] uppercase tracking-wider mb-2">Generador de códigos QR</p>
         <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#1D1D1F] mb-2">
@@ -364,7 +359,6 @@ export default function CrearQRPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* PANEL IZQUIERDO: ESTILO SaaS PRO */}
         <div className="lg:col-span-7 space-y-6 bg-white p-6 md:p-8 rounded-3xl border border-gray-200/80 shadow-sm">
           
           <div className="select-none cursor-default">
@@ -712,7 +706,6 @@ export default function CrearQRPage() {
             )}
           </div>
 
-          {/* 2. PERSONALIZACIÓN VISUAL */}
           <div className="pt-6 border-t border-gray-100 space-y-4 select-none cursor-default">
             <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F]">
               2. Personalización Visual
@@ -762,7 +755,6 @@ export default function CrearQRPage() {
               </div>
             </div>
 
-            {/* MARCOS */}
             <div className="space-y-3 pt-2">
               <label className="block text-xs font-extrabold text-[#1D1D1F]">Plantilla de Marco Decorativo</label>
               <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
@@ -816,7 +808,6 @@ export default function CrearQRPage() {
             </div>
           </div>
 
-          {/* 3. FORMATO DE EXPORTACIÓN */}
           <div className="pt-6 border-t border-gray-100 select-none cursor-default">
             <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-3">
               3. Formato de Exportación
@@ -844,7 +835,6 @@ export default function CrearQRPage() {
           </div>
         </div>
 
-        {/* PANEL DERECHO: VISTA PREVIA Y ACCIÓN */}
         <div className="lg:col-span-5 bg-white p-6 md:p-8 rounded-3xl border border-gray-200/80 shadow-sm sticky top-24 flex flex-col items-center text-center">
           
           <div className="w-full flex items-center justify-between mb-4">
