@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+export const dynamic = "force-dynamic";
+
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
-  Download, ShieldCheck, Globe, Wifi, Smartphone, FileText, Image as ImageIcon, 
+  Download, Globe, Wifi, Smartphone, FileText, Image as ImageIcon, 
   Play, Type, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload, Utensils, Check
 } from "lucide-react";
 import usePaddle from "@/hooks/usePaddle";
@@ -38,18 +40,16 @@ export default function CrearQRPage() {
     company: "",
     website: ""
   });
-  const [vCardEmailWarning, setVCardEmailWarning] = useState<string | null>(null);
 
   const [emailTo, setEmailTo] = useState("");
-  const [emailEmailWarning, setEmailEmailWarning] = useState<string | null>(null);
   const [emailSubject, setEmailSubject] = useState("");
-  const [emailBody, setEmailBody] = useState("");
+  const emailBody = "";
 
   const [phoneCountryCode, setPhoneCountryCode] = useState("+1");
   const [phoneNum, setPhoneNum] = useState("");
 
   const [qrColor, setQrColor] = useState("#1D1D1F");
-  const [bgColor, setBgColor] = useState("#FFFFFF");
+  const bgColor = "#FFFFFF";
   const [dotStyle, setDotStyle] = useState("square");
   const [hasLogo, setHasLogo] = useState(false);
   const [logoImage, setLogoImage] = useState<string | null>(null);
@@ -69,106 +69,14 @@ export default function CrearQRPage() {
   // Detección automática del parámetro de éxito para descarga automática
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (searchParams.get("success") === "true") {
-      executeRealDownloadForImageOrPdf(selectedFormat);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, [searchParams]);
-
-  const openPaddleCheckout = () => {
-    if (!paddle) {
-      alert("El sistema de pagos se está inicializando, por favor intenta en un momento.");
-      return;
-    }
-
-    paddle.Checkout.open({
-      items: [
-        {
-          priceId: "pri_01m2b4ysp76rmk1ehe8vc1kstk",
-          quantity: 1,
-        },
-      ],
-      settings: {
-        successUrl: "https://helloqr.vercel.app/crear?success=true",
-        displayMode: "overlay",
-        theme: "light",
-      },
-    });
-
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag('event', 'begin_checkout_paddle', {
-        currency: "USD",
-        value: 5.00,
-        format: selectedFormat,
-      });
-    }
-  };
-
-  const requiresPayment = selectedFormat === "svg" || selectedFormat === "pdf" || hasLogo || frameTemplate !== "none";
-
-  const handleEmailChange = (val: string, type: 'email' | 'vcard') => {
-    if (type === 'email') {
-      setEmailTo(val);
-      const suggestion = checkEmailTypo(val);
-      setEmailEmailWarning(suggestion);
-    } else {
-      setVCardData({...vCardData, email: val});
-      const suggestion = checkEmailTypo(val);
-      setVCardEmailWarning(suggestion);
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, maxMB: number, allowedExts: string[]) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const fileSizeMB = file.size / (1024 * 1024);
-    if (fileSizeMB > maxMB) {
-      setFileUploadError(`El archivo supera el límite permitido de ${maxMB} MB.`);
-      return;
-    }
-
-    const fileExt = file.name.split('.').pop()?.toLowerCase();
-    if (!fileExt || !allowedExts.includes(fileExt)) {
-      setFileUploadError(`Formato no válido. Extensiones permitidas: ${allowedExts.join(', ')}`);
-      return;
-    }
-
-    setFileUploadError(null);
-    setUploadedFile({
-      name: file.name,
-      size: `${fileSizeMB.toFixed(2)} MB`,
-      type: file.type
-    });
-    setUrlInput(`https://supabase.helloqr.com/storage/v1/object/public/uploads/${file.name}`);
-  };
-
-  const handleGenerateQR = () => {
-    setIsGenerating(true);
-    setIsGenerated(false);
-
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag('event', 'generate_qr', {
-        content_type: contentType,
-        dot_style: dotStyle,
-      });
-    }
-
-    setTimeout(() => {
-      setIsGenerating(false);
-      setIsGenerated(true);
-    }, 1200);
-  };
-
-  const executeRealDownload = () => {
+  const executeRealDownload = useCallback(() => {
     const svgElement = qrRef.current?.querySelector("svg");
     const canvasElement = qrRef.current?.querySelector("canvas");
 
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag('event', 'download_qr', {
+    if (typeof window !== "undefined" && "gtag" in window) {
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag('event', 'download_qr', {
         format: selectedFormat,
-        requires_payment: requiresPayment,
+        requires_payment: selectedFormat === "svg" || selectedFormat === "pdf" || hasLogo || frameTemplate !== "none",
       });
     }
 
@@ -224,13 +132,99 @@ export default function CrearQRPage() {
         document.body.removeChild(downloadLink);
       }
     } else if (selectedFormat === "pdf") {
-      executeRealDownloadForImageOrPdf('pdf');
+      alert(`¡Licencia validada! Descargando tu archivo en formato PDF en alta resolución.`);
+    }
+  }, [selectedFormat, hasLogo, frameTemplate]);
+
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      alert(`¡Licencia validada! Descargando tu archivo en formato ${selectedFormat.toUpperCase()} en alta resolución.`);
+      executeRealDownload();
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [searchParams, selectedFormat, executeRealDownload]);
+
+  const openPaddleCheckout = () => {
+    if (!paddle) {
+      alert("El sistema de pagos se está inicializando, por favor intenta en un momento.");
+      return;
+    }
+
+    paddle.Checkout.open({
+      items: [
+        {
+          priceId: "pri_01m2b4ysp76rmk1ehe8vc1kstk",
+          quantity: 1,
+        },
+      ],
+      settings: {
+        successUrl: "https://helloqr.vercel.app/crear?success=true",
+        displayMode: "overlay",
+        theme: "light",
+      },
+    });
+
+    if (typeof window !== "undefined" && "gtag" in window) {
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag('event', 'begin_checkout_paddle', {
+        currency: "USD",
+        value: 5.00,
+        format: selectedFormat,
+      });
     }
   };
 
-  const executeRealDownloadForImageOrPdf = (fmt: string) => {
-    alert(`¡Licencia validada! Descargando tu archivo en formato ${fmt.toUpperCase()} en alta resolución.`);
-    executeRealDownload();
+  const requiresPayment = selectedFormat === "svg" || selectedFormat === "pdf" || hasLogo || frameTemplate !== "none";
+
+  const handleEmailChange = (val: string, type: 'email' | 'vcard') => {
+    if (type === 'email') {
+      setEmailTo(val);
+      checkEmailTypo(val);
+    } else {
+      setVCardData({...vCardData, email: val});
+      checkEmailTypo(val);
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, maxMB: number, allowedExts: string[]) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > maxMB) {
+      setFileUploadError(`El archivo supera el límite permitido de ${maxMB} MB.`);
+      return;
+    }
+
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExt || !allowedExts.includes(fileExt)) {
+      setFileUploadError(`Formato no válido. Extensiones permitidas: ${allowedExts.join(', ')}`);
+      return;
+    }
+
+    setFileUploadError(null);
+    setUploadedFile({
+      name: file.name,
+      size: `${fileSizeMB.toFixed(2)} MB`,
+      type: file.type
+    });
+    setUrlInput(`https://supabase.helloqr.com/storage/v1/object/public/uploads/${file.name}`);
+  };
+
+  const handleGenerateQR = () => {
+    setIsGenerating(true);
+    setIsGenerated(false);
+
+    if (typeof window !== "undefined" && "gtag" in window) {
+      (window as unknown as { gtag: (...args: unknown[]) => void }).gtag('event', 'generate_qr', {
+        content_type: contentType,
+        dot_style: dotStyle,
+      });
+    }
+
+    setTimeout(() => {
+      setIsGenerating(false);
+      setIsGenerated(true);
+    }, 1200);
   };
 
   const handleDownloadAction = () => {
@@ -248,22 +242,25 @@ export default function CrearQRPage() {
 
   const getQrPayload = () => {
     switch (contentType) {
-      case "whatsapp":
+      case "whatsapp": {
         const cleanWaPhone = waPhone.replace(/\D/g, '');
         const fullWaNum = waCountryCode.replace('+', '') + cleanWaPhone;
         return `https://wa.me/${fullWaNum}?text=${encodeURIComponent(waMessage)}`;
+      }
       case "wifi":
         return `WIFI:S:${wifiSsid};T:${wifiEncryption};P:${wifiPass};;`;
-      case "vcard":
+      case "vcard": {
         const cleanVCardPhone = vCardData.phone.replace(/\D/g, '');
         const fullVCardPhone = vCardData.countryCode.replace('+', '') + cleanVCardPhone;
         return `BEGIN:VCARD\nVERSION:3.0\nN:${vCardData.lastName};${vCardData.firstName}\nFN:${vCardData.firstName} ${vCardData.lastName}\nORG:${vCardData.company}\nTEL:${fullVCardPhone}\nEMAIL:${vCardData.email}\nURL:${vCardData.website}\nEND:VCARD`;
+      }
       case "email":
         return `mailto:${emailTo}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-      case "phone":
+      case "phone": {
         const cleanPhone = phoneNum.replace(/\D/g, '');
         const fullPhoneNum = phoneCountryCode.replace('+', '') + cleanPhone;
         return `tel:+${fullPhoneNum}`;
+      }
       case "text":
         return textInput;
       default:
@@ -922,7 +919,6 @@ export default function CrearQRPage() {
                   </p>
                 </div>
 
-                {/* Botón Inteligente de Paddle (Apple Pay, Google Pay y Tarjetas) */}
                 <div className="pt-1">
                   <button
                     onClick={() => {
