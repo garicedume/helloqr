@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -64,6 +65,19 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Google Analytics 4 (Carga optimizada afterInteractive) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-MEASUREMENT_ID"
+          strategy="afterInteractive"
+        ></Script>
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-MEASUREMENT_ID');
+          `}
+        </Script>
       </head>
       <body className="font-sans bg-white text-[#1D1D1F] antialiased select-none">
         <PayPalProvider>

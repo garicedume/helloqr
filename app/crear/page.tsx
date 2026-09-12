@@ -104,6 +104,15 @@ export default function CrearQRPage() {
   const handleGenerateQR = () => {
     setIsGenerating(true);
     setIsGenerated(false);
+
+    // Evento de GA4 para medir generación de QR
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag('event', 'generate_qr', {
+        content_type: contentType,
+        dot_style: dotStyle,
+      });
+    }
+
     setTimeout(() => {
       setIsGenerating(false);
       setIsGenerated(true);
@@ -113,6 +122,14 @@ export default function CrearQRPage() {
   const executeRealDownload = () => {
     const svgElement = qrRef.current?.querySelector("svg");
     const canvasElement = qrRef.current?.querySelector("canvas");
+
+    // Evento de GA4 para medir descargas
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag('event', 'download_qr', {
+        format: selectedFormat,
+        requires_payment: requiresPayment,
+      });
+    }
 
     if (selectedFormat === "jpg" || selectedFormat === "png") {
       if (canvasElement) {
@@ -892,6 +909,16 @@ export default function CrearQRPage() {
                       if (actions?.order) {
                         const details = await actions.order.capture();
                         setShowPaymentModal(false);
+
+                        // Evento de GA4 para medir compra de licencia
+                        if (typeof window !== "undefined" && (window as any).gtag) {
+                          (window as any).gtag('event', 'purchase_license', {
+                            currency: "USD",
+                            value: 5.00,
+                            format: selectedFormat,
+                          });
+                        }
+
                         executeRealDownloadForImageOrPdf(selectedFormat);
                       }
                     }}
