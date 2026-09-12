@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { 
   Download, ShieldCheck, Globe, Wifi, MessageCircle, 
   Smartphone, FileText, Image as ImageIcon, Play, Type, 
-  Video, Camera, Share2, Send, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload, Twitter
+  Video, Camera, Share2, Send, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload
 } from "lucide-react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import QRCodeCanvas from "../components/QRCodeCanvas";
@@ -148,18 +148,16 @@ export default function CrearQRPage() {
     }
   };
 
-  // Tipos de contenido con los estilos y colores oficiales exactos inspirados en tu referencia visual
   const contentTypesList = [
     { id: "url", name: "URL / Link", icon: Globe, bgClass: "bg-gray-900 text-white" },
     { id: "pdf", name: "PDF (Max 2MB)", icon: FileText, bgClass: "bg-red-600 text-white" },
     { id: "image", name: "Imagen (Max 2MB)", icon: ImageIcon, bgClass: "bg-purple-600 text-white" },
     { id: "app", name: "App Store", icon: Play, bgClass: "bg-indigo-600 text-white" },
     { id: "text", name: "Texto plano", icon: Type, bgClass: "bg-gray-700 text-white" },
-    { id: "whatsapp", name: "WhatsApp", icon: MessageCircle, bgClass: "bg-[#25D366] text-white" }, // Verde WhatsApp oficial
-    { id: "youtube", name: "YouTube", icon: Video, bgClass: "bg-[#FF0000] text-white" }, // Rojo YouTube oficial
-    { id: "instagram", name: "Instagram", icon: Camera, bgClass: "bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#962fbf] text-white" }, // Degradado Instagram oficial
-    { id: "facebook", name: "Facebook", icon: Share2, bgClass: "bg-[#1877F2] text-white" }, // Azul Facebook oficial
-    { id: "twitter", name: "Twitter / X", icon: Twitter, bgClass: "bg-[#1DA1F2] text-white" }, // Celeste Twitter oficial
+    { id: "whatsapp", name: "WhatsApp", icon: MessageCircle, bgClass: "bg-[#25D366] text-white" },
+    { id: "youtube", name: "YouTube", icon: Video, bgClass: "bg-[#FF0000] text-white" },
+    { id: "instagram", name: "Instagram", icon: Camera, bgClass: "bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#962fbf] text-white" },
+    { id: "facebook", name: "Facebook", icon: Share2, bgClass: "bg-[#1877F2] text-white" },
     { id: "telegram", name: "Telegram", icon: Send, bgClass: "bg-[#229ED9] text-white" },
     { id: "vcard", name: "vCard Contacto", icon: Smartphone, bgClass: "bg-[#A0BE1B] text-slate-900 font-bold" },
     { id: "map", name: "Ubicación Mapa", icon: MapPin, bgClass: "bg-emerald-600 text-white" },
@@ -186,13 +184,13 @@ export default function CrearQRPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
         {/* PANEL IZQUIERDO */}
-        <div className="lg:col-span-7 space-y-8 bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-200/80 shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
+        <div className="lg:col-span-7 space-y-8 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-md">
           <div className="select-none cursor-default">
             <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#A0BE1B]"></span>
               1. Selecciona el tipo de contenido y redes ({contentTypesList.length} opciones)
             </h2>
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-2">
               {contentTypesList.map((type) => {
                 const Icon = type.icon;
                 const active = contentType === type.id;
@@ -225,7 +223,7 @@ export default function CrearQRPage() {
               Configuración para: <span className="text-[#A0BE1B] uppercase">{contentType}</span>
             </h2>
 
-            {["url", "app", "youtube", "instagram", "facebook", "twitter", "telegram", "map", "audio", "booking", "dynamic"].includes(contentType) && (
+            {["url", "app", "youtube", "instagram", "facebook", "telegram", "map", "audio", "booking", "dynamic"].includes(contentType) && (
               <div>
                 <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Enlace o URL de destino</label>
                 <input
@@ -566,7 +564,7 @@ export default function CrearQRPage() {
             )}
           </div>
 
-          {/* 2. PERSONALIZACIÓN VISUAL (Selector de Color Pro estilo Photoshop) */}
+          {/* 2. PERSONALIZACIÓN VISUAL */}
           <div className="pt-6 border-t border-gray-100 space-y-5 select-none cursor-default">
             <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#A0BE1B]"></span>
@@ -622,7 +620,7 @@ export default function CrearQRPage() {
               </div>
             </div>
 
-            {/* MARCOS (PREMIUM) */}
+            {/* MARCOS */}
             <div className="space-y-3.5 pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-extrabold text-[#1D1D1F]">Plantilla de Marco Decorativo (Requiere Licencia)</label>
@@ -714,14 +712,14 @@ export default function CrearQRPage() {
         </div>
 
         {/* PANEL DERECHO: VISTA PREVIA Y BOTÓN DE GENERACIÓN */}
-        <div className="lg:col-span-5 bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-200/80 shadow-[0_12px_40px_rgba(0,0,0,0.04)] sticky top-28 flex flex-col items-center text-center">
+        <div className="lg:col-span-5 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-md sticky top-28 flex flex-col items-center text-center">
           
           <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-6 w-full text-left select-none cursor-default flex items-center justify-between">
             <span>Vista Previa en Vivo</span>
             <span className="w-2 h-2 rounded-full bg-[#A0BE1B] animate-pulse"></span>
           </h2>
 
-          <div className="w-full flex flex-col items-center justify-center relative mb-6 p-6 bg-gray-50/70 rounded-[2rem] border border-gray-200/80 min-h-[260px]">
+          <div className="w-full flex flex-col items-center justify-center relative mb-6 p-6 bg-gray-50/70 rounded-3xl border border-gray-200/80 min-h-64">
             {isGenerating ? (
               <div className="flex flex-col items-center justify-center space-y-3 py-10">
                 <Loader2 className="w-10 h-10 text-[#A0BE1B] animate-spin" />
@@ -785,7 +783,7 @@ export default function CrearQRPage() {
 
           {showPaymentModal && (
             <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in select-none">
-              <div className="bg-white max-w-md w-full p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 text-center space-y-6">
+              <div className="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl border border-gray-100 text-center space-y-6">
                 <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
                   <Lock className="w-8 h-8" />
                 </div>
