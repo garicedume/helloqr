@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   publisher: "HelloQR",
   robots: "index, follow",
   verification: {
-    google: "B45d6PqbiM5oK2TSUUsrkfjGSM3J4PbWudhO1HgBpkE",
+    google: "u93xcLB6AXteGaL2GMybV63dICGBjkiw1WinJ0Q9-ZI",
   },
   openGraph: {
     type: "website",
