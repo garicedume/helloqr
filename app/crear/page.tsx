@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { 
   Download, ShieldCheck, Globe, Wifi, Smartphone, FileText, Image as ImageIcon, 
-  Play, Type, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload
+  Play, Type, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload, Utensils
 } from "lucide-react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import QRCodeCanvas from "../components/QRCodeCanvas";
@@ -147,7 +147,7 @@ export default function CrearQRPage() {
     }
   };
 
-  // Lista de tipos con renderizado optimizado de los logotipos vectoriales oficiales
+  // Lista de tipos con logotipos vectoriales oficiales y opción de Menú Digital
   const contentTypesList = [
     { 
       id: "url", 
@@ -160,6 +160,12 @@ export default function CrearQRPage() {
       name: "PDF (Max 2MB)", 
       bgClass: "bg-red-600 text-white", 
       iconSvg: <FileText className="w-6 h-6" /> 
+    },
+    { 
+      id: "menu", 
+      name: "Menú Digital", 
+      bgClass: "bg-orange-600 text-white", 
+      iconSvg: <Utensils className="w-6 h-6" /> 
     },
     { 
       id: "image", 
@@ -337,7 +343,7 @@ export default function CrearQRPage() {
               Configuración para: <span className="text-[#A0BE1B] uppercase">{contentType}</span>
             </h2>
 
-            {["url", "app", "youtube", "instagram", "facebook", "telegram", "map", "audio", "booking", "dynamic"].includes(contentType) && (
+            {["url", "app", "youtube", "instagram", "facebook", "telegram", "map", "audio", "booking", "dynamic", "menu"].includes(contentType) && (
               <div>
                 <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Enlace o URL de destino</label>
                 <input

@@ -12,8 +12,26 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "HelloQR — Generador Profesional de Códigos QR",
-  description: "Crea códigos QR únicos, personalizados y con estilo propio para tu negocio.",
+  title: "HelloQR — Generador Profesional y Gratuito de Códigos QR",
+  description: "Crea códigos QR únicos, personalizados con tu propio logotipo, colores exactos y marcos profesionales. Generación rápida, segura y gratuita en formato JPG.",
+  keywords: ["generador de codigo qr", "crear qr gratis", "qr con logo", "helloqr", "qr para wifi", "qr para whatsapp", "codigo qr profesional"],
+  authors: [{ name: "HelloQR Team" }],
+  creator: "HelloQR",
+  publisher: "HelloQR",
+  robots: "index, follow",
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    url: "https://helloqr.vercel.app",
+    title: "HelloQR — Generador Profesional y Gratuito de Códigos QR",
+    description: "Crea códigos QR únicos, personalizados con tu propio logotipo y colores exactos para tu negocio.",
+    siteName: "HelloQR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HelloQR — Generador Profesional y Gratuito de Códigos QR",
+    description: "Crea códigos QR únicos, personalizados con tu propio logotipo y colores exactos para tu negocio.",
+  },
 };
 
 export default function RootLayout({
@@ -21,8 +39,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Datos estructurados (Schema.org) para que Google y las IAs indexen la app como software web oficial
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HelloQR",
+    "operatingSystem": "All",
+    "applicationCategory": "DesignApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "USD"
+    },
+    "description": "Herramienta web profesional para generar códigos QR personalizados con logotipos, colores y múltiples formatos de exportación."
+  };
+
   return (
     <html lang="es" className={poppins.variable}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="font-sans bg-white text-[#1D1D1F] antialiased select-none">
         <PayPalProvider>
           <Navbar />
