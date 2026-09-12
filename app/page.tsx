@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AdBanner from "./components/AdBanner";
-import { QrCode, ArrowRight, Globe, Smartphone, FileText, Wifi, MessageCircle, MapPin, CheckCircle2, ShieldCheck, Palette, Utensils, ScanLine, Shapes } from "lucide-react";
+import { QrCode, ArrowRight, Globe, Smartphone, FileText, Wifi, MessageCircle, MapPin, CheckCircle2, ShieldCheck, Palette, ScanLine, Shapes } from "lucide-react";
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
             
             {/* Badge superior moderno */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAFAFC] border border-gray-200/85 shadow-xs">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAFAFC] border border-gray-200/85 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-[#A0BE1B]" />
               <span className="text-xs font-bold uppercase tracking-wider text-[#1D1D1F]">
                 Rápido <span className="text-gray-300 mx-1">•</span> Fácil <span className="text-gray-300 mx-1">•</span> Sin límites
@@ -51,11 +51,11 @@ export default function Home() {
           <div className="lg:col-span-5 relative flex items-center justify-center">
             
             {/* Resplandor ambiental verde de fondo */}
-            <div className="absolute w-[340px] h-[340px] bg-[#A0BE1B]/15 blur-[100px] rounded-full -z-10 pointer-events-none" />
+            <div className="absolute w-85 h-85 bg-[#A0BE1B]/15 blur-[100px] rounded-full -z-10 pointer-events-none" />
 
             <div className="relative w-full max-w-sm flex items-center justify-center py-6">
               
-              {/* Tarjeta flotante izquierda: Identidad / Logo (Cero estrellas) */}
+              {/* Tarjeta flotante izquierda: Identidad / Logo */}
               <div className="absolute -left-2 md:-left-6 top-1/4 bg-white p-3.5 rounded-2xl border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)] flex items-center gap-3 z-20">
                 <div className="w-9 h-9 rounded-xl bg-[#FAFAFC] flex items-center justify-center border border-gray-100 text-[#1D1D1F]">
                   <QrCode className="w-4 h-4 text-[#A0BE1B]" />
@@ -83,7 +83,7 @@ export default function Home() {
               </div>
 
               {/* Silueta de Celular Moderna Estilo iPhone con Pantalla de Menú Digital */}
-              <div className="w-[280px] h-[520px] bg-[#0A0A0C] rounded-[3rem] p-3 shadow-[0_25px_60px_rgba(0,0,0,0.2)] border-2 border-gray-700/80 relative z-10 flex flex-col items-center rotate-[3deg]">
+              <div className="w-70 h-130 bg-[#0A0A0C] rounded-3xl p-3 shadow-[0_25px_60px_rgba(0,0,0,0.2)] border-2 border-gray-700/80 relative z-10 flex flex-col items-center rotate-3">
                 
                 {/* Isla Dinámica / Notch de iPhone */}
                 <div className="absolute top-4 w-28 h-5 bg-black rounded-full z-30 flex items-center justify-end px-2">
@@ -91,7 +91,7 @@ export default function Home() {
                 </div>
 
                 {/* Pantalla QR: el producto es el protagonista */}
-                <div className="w-full h-full bg-white rounded-[2.5rem] pt-12 pb-6 px-5 flex flex-col items-center justify-between relative overflow-hidden border border-gray-200">
+                <div className="w-full h-full bg-white rounded-3xl pt-12 pb-6 px-5 flex flex-col items-center justify-between relative overflow-hidden border border-gray-200">
                   <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full bg-[#A0BE1B]/20 blur-2xl" />
                   <div className="absolute -bottom-20 -left-20 w-48 h-48 rounded-full bg-[#A0BE1B]/10 blur-2xl" />
 
@@ -103,8 +103,8 @@ export default function Home() {
                     <p className="text-sm font-bold text-[#1D1D1F]">Escanéame</p>
                   </div>
 
-                  <div className="relative z-10 w-[205px] h-[205px] bg-white rounded-[2rem] border border-gray-200 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center justify-center p-4">
-                    <div className="absolute inset-3 rounded-[1.4rem] border-[3px] border-[#A0BE1B]/80 pointer-events-none" />
+                  <div className="relative z-10 w-51.25 h-51.25 bg-white rounded-3xl border border-gray-200 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center justify-center p-4">
+                    <div className="absolute inset-3 rounded-3xl border-[3px] border-[#A0BE1B]/80 pointer-events-none" />
                     <QrCode className="w-full h-full text-[#1D1D1F]" strokeWidth={1.8} />
                     <div className="absolute w-11 h-11 rounded-xl bg-[#A0BE1B] border-4 border-white shadow-md flex items-center justify-center">
                       <QrCode className="w-5 h-5 text-white" />
@@ -121,7 +121,9 @@ export default function Home() {
                       Escanear QR
                     </div>
                   </div>
-                </div>              </div>
+                </div>
+
+              </div>
 
             </div>
           </div>
@@ -141,7 +143,7 @@ export default function Home() {
           ].map((item, index) => {
             const IconComp = item.icon;
             return (
-              <div key={index} className="bg-[#FAFAFC] p-6 rounded-[2rem] border border-gray-200/70 shadow-xs flex flex-col items-center text-center hover:border-[#A0BE1B] hover:shadow-md transition-all">
+              <div key={index} className="bg-[#FAFAFC] p-6 rounded-3xl border border-gray-200/70 shadow-sm flex flex-col items-center text-center hover:border-[#A0BE1B] hover:shadow-md transition-all">
                 <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-3 border border-gray-100 shadow-inner text-[#1D1D1F]">
                   <IconComp className="w-7 h-7 text-[#1D1D1F]" />
                 </div>
@@ -183,14 +185,14 @@ export default function Home() {
           </div>
 
           <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-            <div className="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-xs flex flex-col justify-between h-56">
+            <div className="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-sm flex flex-col justify-between h-56">
               <ShieldCheck className="w-10 h-10 text-[#A0BE1B]" />
               <div>
                 <h3 className="font-bold text-[#1D1D1F] text-base">Calidad Garantizada</h3>
                 <p className="text-xs text-[#6E6E73] mt-1">Archivos listos para uso comercial y digital.</p>
               </div>
             </div>
-            <div className="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-xs flex flex-col justify-between h-56 mt-8">
+            <div className="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-sm flex flex-col justify-between h-56 mt-8">
               <QrCode className="w-10 h-10 text-[#A0BE1B]" />
               <div>
                 <h3 className="font-bold text-[#1D1D1F] text-base">Diseño a Medida</h3>
@@ -228,7 +230,7 @@ export default function Home() {
               <Link
                 key={idx}
                 href="/crear"
-                className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col items-center text-center hover:border-[#A0BE1B] hover:shadow-md transition-all group"
+                className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm flex flex-col items-center text-center hover:border-[#A0BE1B] hover:shadow-md transition-all group"
               >
                 <div className="w-12 h-12 rounded-xl bg-[#F5F5F7] flex items-center justify-center text-[#1D1D1F] group-hover:bg-[#A0BE1B] group-hover:text-white transition-colors mb-3">
                   <IconComponent className="w-6 h-6" />
