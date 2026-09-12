@@ -4,7 +4,6 @@ import Script from "next/script";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import PayPalProvider from "./components/PayPalProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -43,7 +42,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Datos estructurados (Schema.org) para que Google y las IAs indexen la app como software web oficial
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -65,7 +63,6 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {/* Google Analytics 4 (Carga optimizada afterInteractive) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-MEASUREMENT_ID"
           strategy="afterInteractive"
@@ -80,11 +77,9 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="font-sans bg-white text-[#1D1D1F] antialiased select-none">
-        <PayPalProvider>
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-        </PayPalProvider>
+        <Navbar />
+        <main className="min-h-screen">{children}</main>
+        <Footer />
       </body>
     </html>
   );
