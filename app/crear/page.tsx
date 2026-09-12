@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { 
   Download, ShieldCheck, Globe, Wifi, Smartphone, FileText, Image as ImageIcon, 
   Play, Type, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload, Utensils
@@ -12,6 +12,7 @@ import { COUNTRIES, checkEmailTypo } from "../utils/helpers";
 
 export default function CrearQRPage() {
   const [contentType, setContentType] = useState("url");
+  const qrRef = useRef<HTMLDivElement>(null);
   
   const [urlInput, setUrlInput] = useState("https://helloqr.com");
   const [textInput, setTextInput] = useState("Hola mundo");
@@ -106,9 +107,10 @@ export default function CrearQRPage() {
     setTimeout(() => {
       setIsGenerating(false);
       setIsGenerated(true);
-    }, 2000);
+    }, 1500);
   };
 
+  // FUNCIÓN DE DESCARGA REAL
   const handleDownloadAction = () => {
     if (!isGenerated) {
       alert("Por favor, haz clic primero en 'Generar Código QR' para procesar tu diseño.");
@@ -118,7 +120,31 @@ export default function CrearQRPage() {
     if (requiresPayment) {
       setShowPaymentModal(true);
     } else {
-      alert(`¡Descargando tu código QR en formato ${selectedFormat.toUpperCase()} de forma totalmente gratuita!`);
+      // Descarga real extrayendo el elemento canvas o svg de la vista previa
+      const svgElement = qrRef.current?.querySelector("svg");
+      const canvasElement = qrRef.current?.querySelector("canvas");
+
+      if (canvasElement) {
+        const imageURL = canvasElement.toDataURL("image/jpeg");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = imageURL;
+        downloadLink.download = `helloqr-code.${selectedFormat}`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      } else if (svgElement) {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+        const svgUrl = URL.createObjectURL(svgBlob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = svgUrl;
+        downloadLink.download = `helloqr-code.svg`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      } else {
+        alert("No se pudo procesar la imagen del QR. Intenta regenerar el código.");
+      }
     }
   };
 
@@ -147,44 +173,13 @@ export default function CrearQRPage() {
     }
   };
 
-  // Lista de tipos con logotipos vectoriales oficiales y opción de Menú Digital
   const contentTypesList = [
-    { 
-      id: "url", 
-      name: "URL / Link", 
-      bgClass: "bg-gray-900 text-white", 
-      iconSvg: <Globe className="w-6 h-6" /> 
-    },
-    { 
-      id: "pdf", 
-      name: "PDF (Max 2MB)", 
-      bgClass: "bg-red-600 text-white", 
-      iconSvg: <FileText className="w-6 h-6" /> 
-    },
-    { 
-      id: "menu", 
-      name: "Menú Digital", 
-      bgClass: "bg-orange-600 text-white", 
-      iconSvg: <Utensils className="w-6 h-6" /> 
-    },
-    { 
-      id: "image", 
-      name: "Imagen (Max 2MB)", 
-      bgClass: "bg-purple-600 text-white", 
-      iconSvg: <ImageIcon className="w-6 h-6" /> 
-    },
-    { 
-      id: "app", 
-      name: "App Store", 
-      bgClass: "bg-indigo-600 text-white", 
-      iconSvg: <Play className="w-6 h-6" /> 
-    },
-    { 
-      id: "text", 
-      name: "Texto plano", 
-      bgClass: "bg-gray-700 text-white", 
-      iconSvg: <Type className="w-6 h-6" /> 
-    },
+    { id: "url", name: "URL / Link", bgClass: "bg-gray-900 text-white", iconSvg: <Globe className="w-6 h-6" /> },
+    { id: "pdf", name: "PDF (Max 2MB)", bgClass: "bg-red-600 text-white", iconSvg: <FileText className="w-6 h-6" /> },
+    { id: "menu", name: "Menú Digital", bgClass: "bg-orange-600 text-white", iconSvg: <Utensils className="w-6 h-6" /> },
+    { id: "image", name: "Imagen (Max 2MB)", bgClass: "bg-purple-600 text-white", iconSvg: <ImageIcon className="w-6 h-6" /> },
+    { id: "app", name: "App Store", bgClass: "bg-indigo-600 text-white", iconSvg: <Play className="w-6 h-6" /> },
+    { id: "text", name: "Texto plano", bgClass: "bg-gray-700 text-white", iconSvg: <Type className="w-6 h-6" /> },
     { 
       id: "whatsapp", 
       name: "WhatsApp", 
@@ -235,60 +230,15 @@ export default function CrearQRPage() {
         </svg>
       )
     },
-    { 
-      id: "vcard", 
-      name: "vCard Contacto", 
-      bgClass: "bg-[#A0BE1B] text-slate-900 font-bold", 
-      iconSvg: <Smartphone className="w-6 h-6" /> 
-    },
-    { 
-      id: "map", 
-      name: "Ubicación Mapa", 
-      bgClass: "bg-emerald-600 text-white", 
-      iconSvg: <MapPin className="w-6 h-6" /> 
-    },
-    { 
-      id: "wifi", 
-      name: "Red WiFi", 
-      bgClass: "bg-cyan-600 text-white", 
-      iconSvg: <Wifi className="w-6 h-6" /> 
-    },
-    { 
-      id: "audio", 
-      name: "Audio MP3", 
-      bgClass: "bg-pink-600 text-white", 
-      iconSvg: <Headphones className="w-6 h-6" /> 
-    },
-    { 
-      id: "email", 
-      name: "E-mail", 
-      bgClass: "bg-amber-600 text-white", 
-      iconSvg: <Mail className="w-6 h-6" /> 
-    },
-    { 
-      id: "booking", 
-      name: "Reservas", 
-      bgClass: "bg-blue-500 text-white", 
-      iconSvg: <Calendar className="w-6 h-6" /> 
-    },
-    { 
-      id: "phone", 
-      name: "Teléfono", 
-      bgClass: "bg-green-600 text-white", 
-      iconSvg: <Phone className="w-6 h-6" /> 
-    },
-    { 
-      id: "pptx", 
-      name: "PowerPoint", 
-      bgClass: "bg-[#D04423] text-white", 
-      iconSvg: <Presentation className="w-6 h-6" /> 
-    },
-    { 
-      id: "dynamic", 
-      name: "URL Dinámica", 
-      bgClass: "bg-violet-600 text-white", 
-      iconSvg: <Link2 className="w-6 h-6" /> 
-    },
+    { id: "vcard", name: "vCard Contacto", bgClass: "bg-[#A0BE1B] text-slate-900 font-bold", iconSvg: <Smartphone className="w-6 h-6" /> },
+    { id: "map", name: "Ubicación Mapa", bgClass: "bg-emerald-600 text-white", iconSvg: <MapPin className="w-6 h-6" /> },
+    { id: "wifi", name: "Red WiFi", bgClass: "bg-cyan-600 text-white", iconSvg: <Wifi className="w-6 h-6" /> },
+    { id: "audio", name: "Audio MP3", bgClass: "bg-pink-600 text-white", iconSvg: <Headphones className="w-6 h-6" /> },
+    { id: "email", name: "E-mail", bgClass: "bg-amber-600 text-white", iconSvg: <Mail className="w-6 h-6" /> },
+    { id: "booking", name: "Reservas", bgClass: "bg-blue-500 text-white", iconSvg: <Calendar className="w-6 h-6" /> },
+    { id: "phone", name: "Teléfono", bgClass: "bg-green-600 text-white", iconSvg: <Phone className="w-6 h-6" /> },
+    { id: "pptx", name: "PowerPoint", bgClass: "bg-[#D04423] text-white", iconSvg: <Presentation className="w-6 h-6" /> },
+    { id: "dynamic", name: "URL Dinámica", bgClass: "bg-violet-600 text-white", iconSvg: <Link2 className="w-6 h-6" /> },
   ];
 
   return (
@@ -297,8 +247,8 @@ export default function CrearQRPage() {
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[#1D1D1F]">
           Editor Maestro <span className="text-[#A0BE1B]">HelloQR</span>
         </h1>
-        <p className="text-[#6E6E73] mt-3 text-sm md:text-base">
-          Personaliza colores y descarga en JPG de forma 100% gratuita. Logotipos oficiales y diseño profesional.
+        <p className="text-[#6E6E73] mt-3 text-base md:text-lg">
+          Personaliza colores y descarga en JPG o alta resolución de forma 100% gratuita. Diseño profesional.
         </p>
       </div>
 
@@ -307,8 +257,8 @@ export default function CrearQRPage() {
         {/* PANEL IZQUIERDO */}
         <div className="lg:col-span-7 space-y-8 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-md">
           <div className="select-none cursor-default">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#A0BE1B]"></span>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
               1. Selecciona el tipo de contenido y redes ({contentTypesList.length} opciones)
             </h2>
             <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-2">
@@ -330,7 +280,7 @@ export default function CrearQRPage() {
                     <div className={`p-3 rounded-2xl shadow-sm ${type.bgClass} flex items-center justify-center`}>
                       {type.iconSvg}
                     </div>
-                    <span className="text-[11px] text-center leading-tight font-bold text-[#1D1D1F]">{type.name}</span>
+                    <span className="text-xs text-center leading-tight font-bold text-[#1D1D1F]">{type.name}</span>
                   </button>
                 );
               })}
@@ -338,14 +288,14 @@ export default function CrearQRPage() {
           </div>
 
           <div className="pt-6 border-t border-gray-100 space-y-4">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] select-none cursor-default flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#A0BE1B]"></span>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] select-none cursor-default flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
               Configuración para: <span className="text-[#A0BE1B] uppercase">{contentType}</span>
             </h2>
 
             {["url", "app", "youtube", "instagram", "facebook", "telegram", "map", "audio", "booking", "dynamic", "menu"].includes(contentType) && (
               <div>
-                <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Enlace o URL de destino</label>
+                <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Enlace o URL de destino</label>
                 <input
                   type="text"
                   value={urlInput}
@@ -358,7 +308,7 @@ export default function CrearQRPage() {
 
             {contentType === "pdf" && (
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu documento PDF (Máx. 2 MB)</label>
+                <label className="block text-sm font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu documento PDF (Máx. 2 MB)</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center bg-gray-50/50 hover:border-[#A0BE1B] transition-colors relative">
                   <input 
                     type="file" 
@@ -368,19 +318,19 @@ export default function CrearQRPage() {
                   />
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Upload className="w-8 h-8 text-[#A0BE1B]" />
-                    <p className="text-xs font-bold text-[#1D1D1F]">
+                    <p className="text-sm font-bold text-[#1D1D1F]">
                       {uploadedFile ? uploadedFile.name : "Haz clic o arrastra tu archivo PDF aquí"}
                     </p>
-                    <span className="text-[10px] text-[#6E6E73]">Almacenamiento en Supabase</span>
+                    <span className="text-xs text-[#6E6E73]">Almacenamiento en Supabase</span>
                   </div>
                 </div>
-                {fileUploadError && <p className="text-xs text-red-500 font-medium">{fileUploadError}</p>}
+                {fileUploadError && <p className="text-sm text-red-500 font-medium">{fileUploadError}</p>}
               </div>
             )}
 
             {contentType === "image" && (
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu Imagen (Máx. 2 MB)</label>
+                <label className="block text-sm font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu Imagen (Máx. 2 MB)</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center bg-gray-50/50 hover:border-[#A0BE1B] transition-colors relative">
                   <input 
                     type="file" 
@@ -390,19 +340,19 @@ export default function CrearQRPage() {
                   />
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Upload className="w-8 h-8 text-[#A0BE1B]" />
-                    <p className="text-xs font-bold text-[#1D1D1F]">
+                    <p className="text-sm font-bold text-[#1D1D1F]">
                       {uploadedFile ? uploadedFile.name : "Haz clic o arrastra tu imagen aquí"}
                     </p>
-                    <span className="text-[10px] text-[#6E6E73]">Formatos JPG, PNG, WEBP</span>
+                    <span className="text-xs text-[#6E6E73]">Formatos JPG, PNG, WEBP</span>
                   </div>
                 </div>
-                {fileUploadError && <p className="text-xs text-red-500 font-medium">{fileUploadError}</p>}
+                {fileUploadError && <p className="text-sm text-red-500 font-medium">{fileUploadError}</p>}
               </div>
             )}
 
             {contentType === "pptx" && (
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu presentación PowerPoint (Máx. 3 MB)</label>
+                <label className="block text-sm font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu presentación PowerPoint (Máx. 3 MB)</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center bg-gray-50/50 hover:border-[#A0BE1B] transition-colors relative">
                   <input 
                     type="file" 
@@ -412,19 +362,19 @@ export default function CrearQRPage() {
                   />
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Upload className="w-8 h-8 text-[#A0BE1B]" />
-                    <p className="text-xs font-bold text-[#1D1D1F]">
+                    <p className="text-sm font-bold text-[#1D1D1F]">
                       {uploadedFile ? uploadedFile.name : "Haz clic o arrastra tu archivo PPTX aquí"}
                     </p>
-                    <span className="text-[10px] text-[#6E6E73]">Soporte para presentaciones</span>
+                    <span className="text-xs text-[#6E6E73]">Soporte para presentaciones</span>
                   </div>
                 </div>
-                {fileUploadError && <p className="text-xs text-red-500 font-medium">{fileUploadError}</p>}
+                {fileUploadError && <p className="text-sm text-red-500 font-medium">{fileUploadError}</p>}
               </div>
             )}
 
             {contentType === "text" && (
               <div>
-                <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Mensaje o texto plano</label>
+                <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Mensaje o texto plano</label>
                 <textarea
                   rows={3}
                   value={textInput}
@@ -438,7 +388,7 @@ export default function CrearQRPage() {
             {contentType === "whatsapp" && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Número de WhatsApp</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Número de WhatsApp</label>
                   <div className="grid grid-cols-12 gap-2">
                     <select
                       value={waCountryCode}
@@ -461,7 +411,7 @@ export default function CrearQRPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Mensaje predefinido (Opcional)</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Mensaje predefinido (Opcional)</label>
                   <input
                     type="text"
                     value={waMessage}
@@ -476,7 +426,7 @@ export default function CrearQRPage() {
             {contentType === "wifi" && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Nombre de la red (SSID)</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Nombre de la red (SSID)</label>
                   <input
                     type="text"
                     value={wifiSsid}
@@ -486,7 +436,7 @@ export default function CrearQRPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Contraseña</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Contraseña</label>
                   <input
                     type="text"
                     value={wifiPass}
@@ -496,7 +446,7 @@ export default function CrearQRPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Tipo de Encriptación</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Tipo de Encriptación</label>
                   <select
                     value={wifiEncryption}
                     onChange={(e) => setWifiEncryption(e.target.value)}
@@ -513,27 +463,27 @@ export default function CrearQRPage() {
             {contentType === "vcard" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 select-none">
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Nombre</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Nombre</label>
                   <input
                     type="text"
                     value={vCardData.firstName}
                     onChange={(e) => setVCardData({...vCardData, firstName: e.target.value})}
                     placeholder="Juan"
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Apellido</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Apellido</label>
                   <input
                     type="text"
                     value={vCardData.lastName}
                     onChange={(e) => setVCardData({...vCardData, lastName: e.target.value})}
                     placeholder="Pérez"
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Teléfono</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Teléfono</label>
                   <div className="grid grid-cols-12 gap-2">
                     <select
                       value={vCardData.countryCode}
@@ -551,18 +501,18 @@ export default function CrearQRPage() {
                       value={vCardData.phone}
                       onChange={(e) => setVCardData({...vCardData, phone: e.target.value})}
                       placeholder="8095551234"
-                      className="col-span-7 px-4 py-3 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
+                      className="col-span-7 px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
                     />
                   </div>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Correo Electrónico</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Correo Electrónico</label>
                   <input
                     type="email"
                     value={vCardData.email}
                     onChange={(e) => handleEmailChange(e.target.value, 'vcard')}
                     placeholder="juan@correo.com"
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
                   />
                   {vCardEmailWarning && (
                     <div className="mt-2 flex items-center justify-between bg-amber-50 border border-amber-200 px-3.5 py-2 rounded-xl text-xs text-amber-800">
@@ -583,23 +533,23 @@ export default function CrearQRPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Empresa</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Empresa</label>
                   <input
                     type="text"
                     value={vCardData.company}
                     onChange={(e) => setVCardData({...vCardData, company: e.target.value})}
                     placeholder="Mi Empresa SRL"
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Sitio Web</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 cursor-default">Sitio Web</label>
                   <input
                     type="text"
                     value={vCardData.website}
                     onChange={(e) => setVCardData({...vCardData, website: e.target.value})}
                     placeholder="https://miempresa.com"
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] select-auto"
                   />
                 </div>
               </div>
@@ -608,7 +558,7 @@ export default function CrearQRPage() {
             {contentType === "email" && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Correo destinatario</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Correo destinatario</label>
                   <input
                     type="email"
                     value={emailTo}
@@ -635,7 +585,7 @@ export default function CrearQRPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Asunto</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Asunto</label>
                   <input
                     type="text"
                     value={emailSubject}
@@ -645,7 +595,7 @@ export default function CrearQRPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Cuerpo del mensaje</label>
+                  <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Cuerpo del mensaje</label>
                   <textarea
                     rows={2}
                     value={emailBody}
@@ -659,7 +609,7 @@ export default function CrearQRPage() {
 
             {contentType === "phone" && (
               <div>
-                <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Número de teléfono</label>
+                <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Número de teléfono</label>
                 <div className="grid grid-cols-12 gap-2">
                   <select
                     value={phoneCountryCode}
@@ -686,8 +636,8 @@ export default function CrearQRPage() {
 
           {/* 2. PERSONALIZACIÓN VISUAL */}
           <div className="pt-6 border-t border-gray-100 space-y-5 select-none cursor-default">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#A0BE1B]"></span>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
               2. Personalización Visual (Color Gratis)
             </h2>
             
@@ -703,7 +653,7 @@ export default function CrearQRPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/60 p-4 rounded-3xl border border-gray-200/60">
               <div>
-                <label className="block text-xs font-bold text-[#1D1D1F] mb-2">Selector de Color Exacto (HEX)</label>
+                <label className="block text-sm font-bold text-[#1D1D1F] mb-2">Selector de Color Exacto (HEX)</label>
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <input
@@ -723,15 +673,15 @@ export default function CrearQRPage() {
                     />
                   </div>
                 </div>
-                <span className="text-[10px] text-[#6E6E73] mt-1 block">Cambiar el color del QR es 100% gratuito</span>
+                <span className="text-xs text-[#6E6E73] mt-1.5 block">Cambiar el color del QR es 100% gratuito</span>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1D1D1F] mb-2">Forma de Puntos</label>
+                <label className="block text-sm font-bold text-[#1D1D1F] mb-2">Forma de Puntos</label>
                 <select
                   value={dotStyle}
                   onChange={(e) => setDotStyle(e.target.value)}
-                  className="w-full px-3 py-3 rounded-2xl border border-gray-300 text-xs bg-white text-[#1D1D1F] font-semibold focus:outline-none focus:border-[#A0BE1B]"
+                  className="w-full px-3 py-3 rounded-2xl border border-gray-300 text-sm bg-white text-[#1D1D1F] font-semibold focus:outline-none focus:border-[#A0BE1B]"
                 >
                   <option value="square">Cuadrado clásico</option>
                   <option value="dots">Puntos redondeados</option>
@@ -743,8 +693,8 @@ export default function CrearQRPage() {
             {/* MARCOS */}
             <div className="space-y-3.5 pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-extrabold text-[#1D1D1F]">Plantilla de Marco Decorativo (Requiere Licencia)</label>
-                <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Pro</span>
+                <label className="block text-sm font-extrabold text-[#1D1D1F]">Plantilla de Marco Decorativo (Requiere Licencia)</label>
+                <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">Pro</span>
               </div>
               <div className="grid grid-cols-3 md:grid-cols-5 gap-2.5">
                 {[
@@ -771,17 +721,17 @@ export default function CrearQRPage() {
               {frameTemplate !== "none" && (
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div>
-                    <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5">Texto del Marco</label>
+                    <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5">Texto del Marco</label>
                     <input
                       type="text"
                       value={frameText}
                       onChange={(e) => setFrameText(e.target.value)}
                       placeholder="Ej: ¡Escanéame!"
-                      className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-200 text-xs focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 select-auto text-[#1D1D1F]"
+                      className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 select-auto text-[#1D1D1F]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5">Color del Marco</label>
+                    <label className="block text-sm font-semibold text-[#1D1D1F] mb-1.5">Color del Marco</label>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
@@ -799,8 +749,8 @@ export default function CrearQRPage() {
 
           {/* 3. FORMATO DE EXPORTACIÓN */}
           <div className="pt-6 border-t border-gray-100 select-none cursor-default">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#A0BE1B]"></span>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
               3. Formato de Exportación
             </h2>
             <div className="grid grid-cols-4 gap-2.5">
@@ -821,7 +771,7 @@ export default function CrearQRPage() {
                 >
                   <span>{fmt.label}</span>
                   {fmt.badge && (
-                    <span className={`text-[9px] px-1.5 py-0.2 rounded font-semibold ${selectedFormat === fmt.id ? "bg-[#A0BE1B] text-[#1D1D1F]" : "bg-amber-100 text-amber-800"}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${selectedFormat === fmt.id ? "bg-[#A0BE1B] text-[#1D1D1F]" : "bg-amber-100 text-amber-800"}`}>
                       {fmt.badge}
                     </span>
                   )}
@@ -834,17 +784,17 @@ export default function CrearQRPage() {
         {/* PANEL DERECHO: VISTA PREVIA Y BOTÓN DE GENERACIÓN */}
         <div className="lg:col-span-5 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-md sticky top-28 flex flex-col items-center text-center">
           
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-6 w-full text-left select-none cursor-default flex items-center justify-between">
+          <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-6 w-full text-left select-none cursor-default flex items-center justify-between">
             <span>Vista Previa en Vivo</span>
-            <span className="w-2 h-2 rounded-full bg-[#A0BE1B] animate-pulse"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B] animate-pulse"></span>
           </h2>
 
-          <div className="w-full flex flex-col items-center justify-center relative mb-6 p-6 bg-gray-50/70 rounded-3xl border border-gray-200/80 min-h-64">
+          <div ref={qrRef} className="w-full flex flex-col items-center justify-center relative mb-6 p-6 bg-gray-50/70 rounded-3xl border border-gray-200/80 min-h-64">
             {isGenerating ? (
               <div className="flex flex-col items-center justify-center space-y-3 py-10">
                 <Loader2 className="w-10 h-10 text-[#A0BE1B] animate-spin" />
-                <p className="text-xs font-bold text-[#1D1D1F]">Generando matriz de puntos QR...</p>
-                <span className="text-[10px] text-[#6E6E73]">Aplicando algoritmos de alta fidelidad</span>
+                <p className="text-sm font-bold text-[#1D1D1F]">Generando matriz de puntos QR...</p>
+                <span className="text-xs text-[#6E6E73]">Aplicando algoritmos de alta fidelidad</span>
               </div>
             ) : isGenerated ? (
               <QRCodeCanvas 
@@ -865,8 +815,8 @@ export default function CrearQRPage() {
                 <div className="w-14 h-14 bg-gray-200/70 rounded-full flex items-center justify-center text-[#6E6E73]">
                   <Globe className="w-6 h-6 text-[#A0BE1B]" />
                 </div>
-                <p className="text-xs font-bold text-[#1D1D1F]">Tu código está listo para compilar</p>
-                <p className="text-[11px] text-[#6E6E73]">Haz clic en el botón inferior para procesar y renderizar tu código QR en vivo.</p>
+                <p className="text-sm font-bold text-[#1D1D1F]">Tu código está listo para compilar</p>
+                <p className="text-xs text-[#6E6E73]">Haz clic en el botón inferior para procesar y renderizar tu código QR en vivo.</p>
               </div>
             )}
           </div>
@@ -895,7 +845,7 @@ export default function CrearQRPage() {
           {isGenerated && (
             <button 
               onClick={handleGenerateQR}
-              className="text-[11px] text-[#6E6E73] hover:text-[#1D1D1F] underline mt-3 font-medium"
+              className="text-xs text-[#6E6E73] hover:text-[#1D1D1F] underline mt-3 font-medium"
             >
               Regenerar o actualizar diseño
             </button>
@@ -956,7 +906,7 @@ export default function CrearQRPage() {
             </div>
           )}
 
-          <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-[#6E6E73] select-none cursor-default">
+          <div className="mt-5 flex items-center justify-center gap-2 text-xs text-[#6E6E73] select-none cursor-default">
             <ShieldCheck className="w-4 h-4 text-[#A0BE1B]" />
             <span>Transacciones cifradas y protegidas por PayPal</span>
           </div>
