@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   Download, ShieldCheck, Globe, Wifi, Smartphone, FileText, Image as ImageIcon, 
   Play, Type, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload, Utensils, Check
 } from "lucide-react";
-import { PayPalButtons } from "@paypal/react-paypal-js";
+import usePaddle from "@/hooks/usePaddle";
 import QRCodeCanvas from "../components/QRCodeCanvas";
 import LogoColorExtractor from "../components/LogoColorExtractor";
 import { COUNTRIES, checkEmailTypo } from "../utils/helpers";
@@ -61,6 +62,49 @@ export default function CrearQRPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // Inicialización del SDK de Paddle para pagos rápidos globales
+  const paddle = usePaddle();
+
+  // Detección automática del parámetro de éxito de pago en la URL
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      executeRealDownloadForImageOrPdf(selectedFormat);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [searchParams]);
+
+  const openPaddleCheckout = () => {
+    if (!paddle) {
+      alert("El sistema de pagos se está inicializando, por favor intenta en un momento.");
+      return;
+    }
+
+    paddle.Checkout.open({
+      items: [
+        {
+          priceId: "pri_01m2b4ysp76rmk1ehe8vc1kstk",
+          quantity: 1,
+        },
+      ],
+      settings: {
+        successUrl: "https://helloqr.vercel.app/crear?success=true",
+        displayMode: "overlay",
+        theme: "light",
+      },
+    });
+
+    // Evento de GA4 para medir intento de compra con Paddle
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag('event', 'begin_checkout_paddle', {
+        currency: "USD",
+        value: 5.00,
+        format: selectedFormat,
+      });
+    }
+  };
 
   const requiresPayment = selectedFormat === "svg" || selectedFormat === "pdf" || hasLogo || frameTemplate !== "none";
 
@@ -888,45 +932,17 @@ export default function CrearQRPage() {
                   </p>
                 </div>
 
+                {/* Botón Inteligente de Paddle (Apple Pay, Google Pay y Tarjetas) */}
                 <div className="pt-1">
-                  <PayPalButtons 
-                    style={{ layout: "vertical", shape: "rect", label: "pay" }}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        intent: "CAPTURE",
-                        purchase_units: [
-                          {
-                            amount: {
-                              currency_code: "USD",
-                              value: "5.00",
-                            },
-                            description: "HelloQR — Licencia de Exportación Avanzada",
-                          },
-                        ],
-                      });
+                  <button
+                    onClick={() => {
+                      setShowPaymentModal(false);
+                      openPaddleCheckout();
                     }}
-                    onApprove={async (data, actions) => {
-                      if (actions?.order) {
-                        const details = await actions.order.capture();
-                        setShowPaymentModal(false);
-
-                        // Evento de GA4 para medir compra de licencia
-                        if (typeof window !== "undefined" && (window as any).gtag) {
-                          (window as any).gtag('event', 'purchase_license', {
-                            currency: "USD",
-                            value: 5.00,
-                            format: selectedFormat,
-                          });
-                        }
-
-                        executeRealDownloadForImageOrPdf(selectedFormat);
-                      }
-                    }}
-                    onError={(err) => {
-                      console.error("Error en la pasarela de PayPal:", err);
-                      alert("Ocurrió un error al procesar el pago. Por favor, intenta de nuevo.");
-                    }}
-                  />
+                    className="w-full py-3.5 rounded-xl font-bold text-xs transition-all duration-200 bg-[#1D1D1F] text-white hover:bg-black shadow-sm flex items-center justify-center gap-2"
+                  >
+                    <span>Pagar con Apple Pay / Google Pay / Tarjeta</span>
+                  </button>
                 </div>
 
                 <button
@@ -942,7 +958,7 @@ export default function CrearQRPage() {
           <div className="mt-5 bg-gray-50/80 p-3.5 rounded-2xl border border-gray-100 w-full text-left flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-[#A0BE1B] shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#6E6E73] leading-relaxed">
-              En el siguiente paso podrás personalizar colores, logo, marco y más. Transacciones protegidas por PayPal.
+              En el siguiente paso podrás personalizar colores, logo, marco y más. Transacciones protegidas y globales por Paddle.
             </p>
           </div>
 
