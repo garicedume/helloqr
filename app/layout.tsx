@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   creator: "HelloQR",
   publisher: "HelloQR",
   robots: "index, follow",
+  verification: {
+    google: "B45d6PqbiM5oK2TSUUsrkfjGSM3J4PbWudhO1HgBpkE",
+  },
   openGraph: {
     type: "website",
     locale: "es_ES",
