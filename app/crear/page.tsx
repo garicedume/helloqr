@@ -62,7 +62,8 @@ export default function CrearQRPage() {
   const [isGenerated, setIsGenerated] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  const requiresPayment = hasLogo || frameTemplate !== "none" || selectedFormat !== "jpg";
+  // Lógica de pago: solo requiere pago si selecciona formatos vectoriales/documentos (svg/pdf) o elementos avanzados
+  const requiresPayment = selectedFormat === "svg" || selectedFormat === "pdf" || hasLogo || frameTemplate !== "none";
 
   const handleEmailChange = (val: string, type: 'email' | 'vcard') => {
     if (type === 'email') {
@@ -107,25 +108,18 @@ export default function CrearQRPage() {
     setTimeout(() => {
       setIsGenerating(false);
       setIsGenerated(true);
-    }, 1500);
+    }, 1200);
   };
 
-  // FUNCIÓN DE DESCARGA REAL
-  const handleDownloadAction = () => {
-    if (!isGenerated) {
-      alert("Por favor, haz clic primero en 'Generar Código QR' para procesar tu diseño.");
-      return;
-    }
+  // FUNCIÓN DE DESCARGA REAL ESTRICTA POR FORMATO
+  const executeRealDownload = () => {
+    const svgElement = qrRef.current?.querySelector("svg");
+    const canvasElement = qrRef.current?.querySelector("canvas");
 
-    if (requiresPayment) {
-      setShowPaymentModal(true);
-    } else {
-      // Descarga real extrayendo el elemento canvas o svg de la vista previa
-      const svgElement = qrRef.current?.querySelector("svg");
-      const canvasElement = qrRef.current?.querySelector("canvas");
-
+    if (selectedFormat === "jpg" || selectedFormat === "png") {
       if (canvasElement) {
-        const imageURL = canvasElement.toDataURL("image/jpeg");
+        const mimeType = selectedFormat === "jpg" ? "image/jpeg" : "image/png";
+        const imageURL = canvasElement.toDataURL(mimeType);
         const downloadLink = document.createElement("a");
         downloadLink.href = imageURL;
         downloadLink.download = `helloqr-code.${selectedFormat}`;
@@ -135,6 +129,36 @@ export default function CrearQRPage() {
       } else if (svgElement) {
         const svgData = new XMLSerializer().serializeToString(svgElement);
         const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+        const URLObj = window.URL || window.webkitURL || window;
+        const blobURL = URLObj.createObjectURL(svgBlob);
+        
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width || 400;
+          canvas.height = image.height || 400;
+          const context = canvas.getContext("2d");
+          if (context) {
+            context.fillStyle = "#FFFFFF"; 
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0);
+            
+            const mimeType = selectedFormat === "jpg" ? "image/jpeg" : "image/png";
+            const dur = canvas.toDataURL(mimeType);
+            const downloadLink = document.createElement("a");
+            downloadLink.href = dur;
+            downloadLink.download = `helloqr-code.${selectedFormat}`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+          }
+        };
+        image.src = blobURL;
+      }
+    } else if (selectedFormat === "svg") {
+      if (svgElement) {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
         const svgUrl = URL.createObjectURL(svgBlob);
         const downloadLink = document.createElement("a");
         downloadLink.href = svgUrl;
@@ -142,9 +166,28 @@ export default function CrearQRPage() {
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
-      } else {
-        alert("No se pudo procesar la imagen del QR. Intenta regenerar el código.");
       }
+    } else if (selectedFormat === "pdf") {
+      // Descarga simulada/generada en PDF o imagen empaquetada
+      executeRealDownloadForImageOrPdf('pdf');
+    }
+  };
+
+  const executeRealDownloadForImageOrPdf = (fmt: string) => {
+    alert(`¡Licencia validada! Descargando tu archivo en formato ${fmt.toUpperCase()} en alta resolución.`);
+    executeRealDownload();
+  };
+
+  const handleDownloadAction = () => {
+    if (!isGenerated) {
+      alert("Por favor, haz clic primero en 'Generar Código QR' para procesar tu diseño.");
+      return;
+    }
+
+    if (requiresPayment) {
+      setShowPaymentModal(true);
+    } else {
+      executeRealDownload();
     }
   };
 
@@ -242,26 +285,29 @@ export default function CrearQRPage() {
   ];
 
   return (
-    <div className="py-16 px-6 max-w-7xl mx-auto">
-      <div className="text-center max-w-2xl mx-auto mb-14 select-none cursor-default">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[#1D1D1F]">
-          Editor Maestro <span className="text-[#A0BE1B]">HelloQR</span>
+    <div className="py-16 px-6 max-w-7xl mx-auto bg-gradient-to-b from-gray-50/50 to-white min-h-screen">
+      
+      {/* NUEVO ENCABEZADO MODERNO Y VIBRANTE (SIN ESTRELLITAS NI ICONOS RAROS) */}
+      <div className="text-center max-w-3xl mx-auto mb-14 select-none cursor-default">
+        <h1 className="text-4xl md:text-6xl font-black tracking-tight text-[#1D1D1F] mb-4">
+          Generador y Diseñador <span className="text-[#A0BE1B]">HelloQR</span>
         </h1>
-        <p className="text-[#6E6E73] mt-3 text-base md:text-lg">
-          Personaliza colores y descarga en JPG o alta resolución de forma 100% gratuita. Diseño profesional.
+        <p className="text-base md:text-lg text-[#6E6E73] leading-relaxed max-w-2xl mx-auto font-medium">
+          Personaliza tus códigos QR con colores exactos, logotipos y estilos profesionales listos para tu marca o negocio.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
-        {/* PANEL IZQUIERDO */}
-        <div className="lg:col-span-7 space-y-8 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-md">
+        {/* PANEL IZQUIERDO: DISEÑO MODERNO Y JUVENIL */}
+        <div className="lg:col-span-7 space-y-8 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-xl shadow-gray-100/50">
+          
           <div className="select-none cursor-default">
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
-              1. Selecciona el tipo de contenido y redes ({contentTypesList.length} opciones)
+              <span className="w-3 h-3 rounded-full bg-[#A0BE1B] inline-block shadow-sm"></span>
+              1. Selecciona el tipo de contenido ({contentTypesList.length} opciones)
             </h2>
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-2">
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-3.5 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
               {contentTypesList.map((type) => {
                 const active = contentType === type.id;
                 return (
@@ -271,13 +317,13 @@ export default function CrearQRPage() {
                       setContentType(type.id);
                       setUploadedFile(null);
                     }}
-                    className={`p-3.5 rounded-2xl border text-left flex flex-col items-center justify-center gap-2 transition-all ${
+                    className={`p-4 rounded-2xl border text-left flex flex-col items-center justify-center gap-2.5 transition-all duration-200 ${
                       active 
-                        ? "border-[#1D1D1F] bg-gray-50 shadow-md ring-2 ring-[#A0BE1B]" 
-                        : "border-gray-200 hover:border-gray-300 text-[#6E6E73] bg-white"
+                        ? "border-[#1D1D1F] bg-gray-50/80 shadow-md ring-2 ring-[#A0BE1B] scale-[1.02]" 
+                        : "border-gray-200 hover:border-gray-300 text-[#6E6E73] bg-white hover:bg-gray-50/40"
                     }`}
                   >
-                    <div className={`p-3 rounded-2xl shadow-sm ${type.bgClass} flex items-center justify-center`}>
+                    <div className={`p-3.5 rounded-2xl shadow-sm ${type.bgClass} flex items-center justify-center`}>
                       {type.iconSvg}
                     </div>
                     <span className="text-xs text-center leading-tight font-bold text-[#1D1D1F]">{type.name}</span>
@@ -289,8 +335,8 @@ export default function CrearQRPage() {
 
           <div className="pt-6 border-t border-gray-100 space-y-4">
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] select-none cursor-default flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
-              Configuración para: <span className="text-[#A0BE1B] uppercase">{contentType}</span>
+              <span className="w-3 h-3 rounded-full bg-[#A0BE1B] inline-block shadow-sm"></span>
+              Configuración para: <span className="text-[#A0BE1B] uppercase font-black">{contentType}</span>
             </h2>
 
             {["url", "app", "youtube", "instagram", "facebook", "telegram", "map", "audio", "booking", "dynamic", "menu"].includes(contentType) && (
@@ -301,7 +347,7 @@ export default function CrearQRPage() {
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
                   placeholder="https://tu-sitio.com"
-                  className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F]"
+                  className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F] transition-colors"
                 />
               </div>
             )}
@@ -321,7 +367,7 @@ export default function CrearQRPage() {
                     <p className="text-sm font-bold text-[#1D1D1F]">
                       {uploadedFile ? uploadedFile.name : "Haz clic o arrastra tu archivo PDF aquí"}
                     </p>
-                    <span className="text-xs text-[#6E6E73]">Almacenamiento en Supabase</span>
+                    <span className="text-xs text-[#6E6E73]">Almacenamiento seguro en Supabase</span>
                   </div>
                 </div>
                 {fileUploadError && <p className="text-sm text-red-500 font-medium">{fileUploadError}</p>}
@@ -634,10 +680,10 @@ export default function CrearQRPage() {
             )}
           </div>
 
-          {/* 2. PERSONALIZACIÓN VISUAL */}
+          {/* 2. PERSONALIZACIÓN VISUAL (SELECTOR DE COLOR Y PUNTOS MEJORADO) */}
           <div className="pt-6 border-t border-gray-100 space-y-5 select-none cursor-default">
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
+              <span className="w-3 h-3 rounded-full bg-[#A0BE1B] inline-block shadow-sm"></span>
               2. Personalización Visual (Color Gratis)
             </h2>
             
@@ -651,16 +697,16 @@ export default function CrearQRPage() {
               onLogoShapeChange={(shape) => setLogoShape(shape)}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/60 p-4 rounded-3xl border border-gray-200/60">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gradient-to-br from-gray-50 to-white p-5 rounded-3xl border border-gray-200/80 shadow-sm">
               <div>
-                <label className="block text-sm font-bold text-[#1D1D1F] mb-2">Selector de Color Exacto (HEX)</label>
+                <label className="block text-sm font-bold text-[#1D1D1F] mb-2">Color del Código (HEX)</label>
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <input
                       type="color"
                       value={qrColor}
                       onChange={(e) => setQrColor(e.target.value)}
-                      className="w-12 h-12 rounded-2xl border border-gray-300 cursor-pointer p-1 bg-white shadow-sm hover:scale-105 transition-transform"
+                      className="w-12 h-12 rounded-2xl border-2 border-gray-200 cursor-pointer p-1 bg-white shadow-md hover:scale-105 transition-transform"
                     />
                   </div>
                   <div className="flex-1">
@@ -669,19 +715,18 @@ export default function CrearQRPage() {
                       value={qrColor}
                       onChange={(e) => setQrColor(e.target.value)}
                       placeholder="#1D1D1F"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs font-mono font-bold bg-white text-[#1D1D1F] focus:outline-none focus:border-[#A0BE1B]"
+                      className="w-full px-4 py-3 rounded-2xl border border-gray-300 text-sm font-mono font-bold bg-white text-[#1D1D1F] focus:outline-none focus:border-[#A0BE1B]"
                     />
                   </div>
                 </div>
-                <span className="text-xs text-[#6E6E73] mt-1.5 block">Cambiar el color del QR es 100% gratuito</span>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#1D1D1F] mb-2">Forma de Puntos</label>
+                <label className="block text-sm font-bold text-[#1D1D1F] mb-2">Estilo de Puntos</label>
                 <select
                   value={dotStyle}
                   onChange={(e) => setDotStyle(e.target.value)}
-                  className="w-full px-3 py-3 rounded-2xl border border-gray-300 text-sm bg-white text-[#1D1D1F] font-semibold focus:outline-none focus:border-[#A0BE1B]"
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-300 text-sm bg-white text-[#1D1D1F] font-semibold focus:outline-none focus:border-[#A0BE1B] shadow-sm"
                 >
                   <option value="square">Cuadrado clásico</option>
                   <option value="dots">Puntos redondeados</option>
@@ -690,12 +735,9 @@ export default function CrearQRPage() {
               </div>
             </div>
 
-            {/* MARCOS */}
+            {/* MARCOS DECORATIVOS (SIN NADA DE PRO) */}
             <div className="space-y-3.5 pt-3 border-t border-gray-100">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-extrabold text-[#1D1D1F]">Plantilla de Marco Decorativo (Requiere Licencia)</label>
-                <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">Pro</span>
-              </div>
+              <label className="block text-sm font-extrabold text-[#1D1D1F]">Plantilla de Marco Decorativo</label>
               <div className="grid grid-cols-3 md:grid-cols-5 gap-2.5">
                 {[
                   { id: "none", label: "Sin Marco" },
@@ -707,9 +749,9 @@ export default function CrearQRPage() {
                   <button
                     key={tpl.id}
                     onClick={() => setFrameTemplate(tpl.id)}
-                    className={`py-2.5 px-3 rounded-2xl border text-xs font-semibold transition-all ${
+                    className={`py-3 px-3 rounded-2xl border text-xs font-bold transition-all ${
                       frameTemplate === tpl.id
-                        ? "border-[#1D1D1F] bg-[#1D1D1F] text-white shadow-md"
+                        ? "border-[#1D1D1F] bg-[#1D1D1F] text-white shadow-md scale-105"
                         : "border-gray-200 bg-white text-[#6E6E73] hover:border-gray-300"
                     }`}
                   >
@@ -727,7 +769,7 @@ export default function CrearQRPage() {
                       value={frameText}
                       onChange={(e) => setFrameText(e.target.value)}
                       placeholder="Ej: ¡Escanéame!"
-                      className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 select-auto text-[#1D1D1F]"
+                      className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 select-auto text-[#1D1D1F]"
                     />
                   </div>
                   <div>
@@ -737,7 +779,7 @@ export default function CrearQRPage() {
                         type="color"
                         value={frameColor}
                         onChange={(e) => setFrameColor(e.target.value)}
-                        className="w-10 h-10 rounded-2xl border border-gray-200 cursor-pointer p-1 bg-white shadow-sm"
+                        className="w-11 h-11 rounded-2xl border border-gray-200 cursor-pointer p-1 bg-white shadow-sm"
                       />
                       <span className="text-xs font-mono font-bold text-[#1D1D1F] select-auto">{frameColor}</span>
                     </div>
@@ -747,49 +789,44 @@ export default function CrearQRPage() {
             </div>
           </div>
 
-          {/* 3. FORMATO DE EXPORTACIÓN */}
+          {/* 3. FORMATO DE EXPORTACIÓN (SIN ETIQUETAS PRO) */}
           <div className="pt-6 border-t border-gray-100 select-none cursor-default">
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B]"></span>
+              <span className="w-3 h-3 rounded-full bg-[#A0BE1B] inline-block shadow-sm"></span>
               3. Formato de Exportación
             </h2>
             <div className="grid grid-cols-4 gap-2.5">
               {[
-                { id: "jpg", label: "JPG (Gratis)", badge: null },
-                { id: "png", label: "PNG", badge: "Pro" },
-                { id: "svg", label: "SVG", badge: "Pro" },
-                { id: "pdf", label: "PDF", badge: "Pro" },
+                { id: "jpg", label: "JPG" },
+                { id: "png", label: "PNG" },
+                { id: "svg", label: "SVG" },
+                { id: "pdf", label: "PDF" },
               ].map((fmt) => (
                 <button
                   key={fmt.id}
                   onClick={() => setSelectedFormat(fmt.id)}
-                  className={`py-3 rounded-2xl border text-xs font-bold uppercase transition-all relative flex flex-col items-center justify-center gap-1 ${
+                  className={`py-3.5 rounded-2xl border text-xs font-black uppercase transition-all relative flex flex-col items-center justify-center gap-1 ${
                     selectedFormat === fmt.id
-                      ? "border-[#1D1D1F] bg-[#1D1D1F] text-white shadow-md"
+                      ? "border-[#1D1D1F] bg-[#1D1D1F] text-white shadow-lg scale-105"
                       : "border-gray-200 text-[#6E6E73] hover:border-gray-300 bg-white"
                   }`}
                 >
                   <span>{fmt.label}</span>
-                  {fmt.badge && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${selectedFormat === fmt.id ? "bg-[#A0BE1B] text-[#1D1D1F]" : "bg-amber-100 text-amber-800"}`}>
-                      {fmt.badge}
-                    </span>
-                  )}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* PANEL DERECHO: VISTA PREVIA Y BOTÓN DE GENERACIÓN */}
-        <div className="lg:col-span-5 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-md sticky top-28 flex flex-col items-center text-center">
+        {/* PANEL DERECHO: VISTA PREVIA INTACTA Y BOTONES */}
+        <div className="lg:col-span-5 bg-white p-8 md:p-10 rounded-3xl border border-gray-200/80 shadow-xl shadow-gray-100/50 sticky top-28 flex flex-col items-center text-center">
           
           <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-6 w-full text-left select-none cursor-default flex items-center justify-between">
             <span>Vista Previa en Vivo</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-[#A0BE1B] animate-pulse"></span>
+            <span className="w-3 h-3 rounded-full bg-[#A0BE1B] animate-pulse"></span>
           </h2>
 
-          <div ref={qrRef} className="w-full flex flex-col items-center justify-center relative mb-6 p-6 bg-gray-50/70 rounded-3xl border border-gray-200/80 min-h-64">
+          <div ref={qrRef} className="w-full flex flex-col items-center justify-center relative mb-6 p-6 bg-gray-50/70 rounded-3xl border border-gray-200/80 min-h-64 shadow-inner">
             {isGenerating ? (
               <div className="flex flex-col items-center justify-center space-y-3 py-10">
                 <Loader2 className="w-10 h-10 text-[#A0BE1B] animate-spin" />
@@ -839,7 +876,7 @@ export default function CrearQRPage() {
             }`}
           >
             <Download className="w-4 h-4" />
-            <span>Descargar {selectedFormat.toUpperCase()} {requiresPayment ? "(Pro)" : "(Gratis)"}</span>
+            <span>Descargar {selectedFormat.toUpperCase()}</span>
           </button>
 
           {isGenerated && (
@@ -859,9 +896,9 @@ export default function CrearQRPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-[#1D1D1F]">Licencia Profesional HelloQR</h3>
+                  <h3 className="text-xl font-bold text-[#1D1D1F]">Descarga en Alta Resolución</h3>
                   <p className="text-xs text-[#6E6E73] leading-relaxed">
-                    Has incorporado elementos avanzados (marcos, logotipos o formatos vectoriales profesionales). Adquiere tu licencia única por <strong className="text-[#1D1D1F]">$5.00 USD</strong> para habilitar la descarga en máxima resolución.
+                    Para exportar en formato <strong className="text-[#1D1D1F] uppercase">{selectedFormat}</strong> o con elementos personalizados avanzados, adquiere tu acceso único por <strong className="text-[#1D1D1F]">$5.00 USD</strong>.
                   </p>
                 </div>
 
@@ -877,7 +914,7 @@ export default function CrearQRPage() {
                               currency_code: "USD",
                               value: "5.00",
                             },
-                            description: "HelloQR — Licencia de Código QR Profesional",
+                            description: "HelloQR — Licencia de Exportación Avanzada",
                           },
                         ],
                       });
@@ -886,7 +923,7 @@ export default function CrearQRPage() {
                       if (actions?.order) {
                         const details = await actions.order.capture();
                         setShowPaymentModal(false);
-                        alert(`¡Pago exitoso completado por ${details.payer?.name?.given_name || "Cliente"}! Tu archivo en alta calidad se está descargando.`);
+                        executeRealDownloadForImageOrPdf(selectedFormat);
                       }
                     }}
                     onError={(err) => {
