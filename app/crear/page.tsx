@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { 
   Download, ShieldCheck, Globe, Wifi, MessageCircle, 
   Smartphone, FileText, Image as ImageIcon, Play, Type, 
-  Video, Camera, Share2, Send, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload
+  Video, Camera, Share2, Send, MapPin, Headphones, Mail, Calendar, Phone, Presentation, Link2, AlertCircle, Lock, Loader2, Upload, Twitter
 } from "lucide-react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import QRCodeCanvas from "../components/QRCodeCanvas";
@@ -17,7 +17,6 @@ export default function CrearQRPage() {
   const [urlInput, setUrlInput] = useState("https://helloqr.com");
   const [textInput, setTextInput] = useState("Hola mundo");
   
-  // Archivos subidos (PDF, Imagen, PPTX)
   const [uploadedFile, setUploadedFile] = useState<{ name: string; size: string; type: string } | null>(null);
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
 
@@ -59,15 +58,10 @@ export default function CrearQRPage() {
   const [frameColor, setFrameColor] = useState("#1D1D1F");
   const [selectedFormat, setSelectedFormat] = useState("jpg");
 
-  // Estados para simulación de Generación Real en Vivo
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
-
-  // Estado para abrir la ventana/modal de cobro
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // El pago aplica UNICAMENTE si usa logo, marcos o formatos avanzados (SVG, PDF, PNG)
-  // Cambiar el color y descargar en JPG es 100% gratis.
   const requiresPayment = hasLogo || frameTemplate !== "none" || selectedFormat !== "jpg";
 
   const handleEmailChange = (val: string, type: 'email' | 'vcard') => {
@@ -99,7 +93,6 @@ export default function CrearQRPage() {
     }
 
     setFileUploadError(null);
-    // Simulación de almacenamiento en Supabase Storage (preparado para producción)
     setUploadedFile({
       name: file.name,
       size: `${fileSizeMB.toFixed(2)} MB`,
@@ -114,7 +107,7 @@ export default function CrearQRPage() {
     setTimeout(() => {
       setIsGenerating(false);
       setIsGenerated(true);
-    }, 2000); // Simula 2 segundos de procesamiento algorítmico real
+    }, 2000);
   };
 
   const handleDownloadAction = () => {
@@ -155,49 +148,49 @@ export default function CrearQRPage() {
     }
   };
 
-  // Listado de tipos de QR con logotipos reales y colores de marca corporativos oficiales
+  // Tipos de contenido con los estilos y colores oficiales exactos inspirados en tu referencia visual
   const contentTypesList = [
-    { id: "url", name: "URL / Link", icon: Globe, color: "text-blue-600 bg-blue-50" },
-    { id: "pdf", name: "PDF (Max 2MB)", icon: FileText, color: "text-red-600 bg-red-50" },
-    { id: "image", name: "Imagen (Max 2MB)", icon: ImageIcon, color: "text-purple-600 bg-purple-50" },
-    { id: "app", name: "Play / App Store", icon: Play, color: "text-indigo-600 bg-indigo-50" },
-    { id: "text", name: "Texto plano", icon: Type, color: "text-gray-700 bg-gray-100" },
-    { id: "whatsapp", name: "WhatsApp", icon: MessageCircle, color: "text-[#25D366] bg-[#25D366]/10" },
-    { id: "youtube", name: "YouTube", icon: Video, color: "text-[#FF0000] bg-[#FF0000]/10" },
-    { id: "instagram", name: "Instagram", icon: Camera, color: "text-[#E1306C] bg-[#E1306C]/10" },
-    { id: "facebook", name: "Facebook", icon: Share2, color: "text-[#1877F2] bg-[#1877F2]/10" },
-    { id: "telegram", name: "Telegram", icon: Send, color: "text-[#229ED9] bg-[#229ED9]/10" },
-    { id: "vcard", name: "vCard Contacto", icon: Smartphone, color: "text-[#A0BE1B] bg-[#A0BE1B]/10" },
-    { id: "map", name: "Ubicación Mapa", icon: MapPin, color: "text-emerald-600 bg-emerald-50" },
-    { id: "wifi", name: "Red WiFi", icon: Wifi, color: "text-cyan-600 bg-cyan-50" },
-    { id: "audio", name: "Audio MP3", icon: Headphones, color: "text-pink-600 bg-pink-50" },
-    { id: "email", name: "E-mail", icon: Mail, color: "text-amber-600 bg-amber-50" },
-    { id: "booking", name: "Booking / Reservas", icon: Calendar, color: "text-blue-500 bg-blue-50" },
-    { id: "phone", name: "Llamada Teléfono", icon: Phone, color: "text-green-600 bg-green-50" },
-    { id: "pptx", name: "PowerPoint (Max 3MB)", icon: Presentation, color: "text-[#D04423] bg-[#D04423]/10" },
-    { id: "dynamic", name: "URL Dinámica", icon: Link2, color: "text-violet-600 bg-violet-50" },
+    { id: "url", name: "URL / Link", icon: Globe, bgClass: "bg-gray-900 text-white" },
+    { id: "pdf", name: "PDF (Max 2MB)", icon: FileText, bgClass: "bg-red-600 text-white" },
+    { id: "image", name: "Imagen (Max 2MB)", icon: ImageIcon, bgClass: "bg-purple-600 text-white" },
+    { id: "app", name: "App Store", icon: Play, bgClass: "bg-indigo-600 text-white" },
+    { id: "text", name: "Texto plano", icon: Type, bgClass: "bg-gray-700 text-white" },
+    { id: "whatsapp", name: "WhatsApp", icon: MessageCircle, bgClass: "bg-[#25D366] text-white" }, // Verde WhatsApp oficial
+    { id: "youtube", name: "YouTube", icon: Video, bgClass: "bg-[#FF0000] text-white" }, // Rojo YouTube oficial
+    { id: "instagram", name: "Instagram", icon: Camera, bgClass: "bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#962fbf] text-white" }, // Degradado Instagram oficial
+    { id: "facebook", name: "Facebook", icon: Share2, bgClass: "bg-[#1877F2] text-white" }, // Azul Facebook oficial
+    { id: "twitter", name: "Twitter / X", icon: Twitter, bgClass: "bg-[#1DA1F2] text-white" }, // Celeste Twitter oficial
+    { id: "telegram", name: "Telegram", icon: Send, bgClass: "bg-[#229ED9] text-white" },
+    { id: "vcard", name: "vCard Contacto", icon: Smartphone, bgClass: "bg-[#A0BE1B] text-slate-900 font-bold" },
+    { id: "map", name: "Ubicación Mapa", icon: MapPin, bgClass: "bg-emerald-600 text-white" },
+    { id: "wifi", name: "Red WiFi", icon: Wifi, bgClass: "bg-cyan-600 text-white" },
+    { id: "audio", name: "Audio MP3", icon: Headphones, bgClass: "bg-pink-600 text-white" },
+    { id: "email", name: "E-mail", icon: Mail, bgClass: "bg-amber-600 text-white" },
+    { id: "booking", name: "Reservas", icon: Calendar, bgClass: "bg-blue-500 text-white" },
+    { id: "phone", name: "Teléfono", icon: Phone, bgClass: "bg-green-600 text-white" },
+    { id: "pptx", name: "PowerPoint", icon: Presentation, bgClass: "bg-[#D04423] text-white" },
+    { id: "dynamic", name: "URL Dinámica", icon: Link2, bgClass: "bg-violet-600 text-white" },
   ];
 
   return (
     <div className="py-16 px-6 max-w-7xl mx-auto">
-      {/* TÍTULO BLINDADO */}
       <div className="text-center max-w-2xl mx-auto mb-14 select-none cursor-default">
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-[#1D1D1F]">
           Editor Maestro <span className="text-[#A0BE1B]">HelloQR</span>
         </h1>
         <p className="text-[#6E6E73] mt-3 text-sm md:text-base">
-          Personaliza colores y descarga en JPG de forma 100% gratuita. Diseña con precisión profesional.
+          Personaliza colores y descarga en JPG de forma 100% gratuita. Botones oficiales y diseño profesional.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
-        {/* PANEL IZQUIERDO: CONFIGURACIÓN PRO (Blanco, Gris y Verde Corporativo) */}
+        {/* PANEL IZQUIERDO */}
         <div className="lg:col-span-7 space-y-8 bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-200/80 shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
           <div className="select-none cursor-default">
             <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#1D1D1F] mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#A0BE1B]"></span>
-              1. Selecciona el tipo de contenido ({contentTypesList.length} opciones)
+              1. Selecciona el tipo de contenido y redes ({contentTypesList.length} opciones)
             </h2>
             <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
               {contentTypesList.map((type) => {
@@ -210,16 +203,16 @@ export default function CrearQRPage() {
                       setContentType(type.id);
                       setUploadedFile(null);
                     }}
-                    className={`p-3 rounded-2xl border text-left flex flex-col items-center justify-center gap-2 transition-all ${
+                    className={`p-3.5 rounded-2xl border text-left flex flex-col items-center justify-center gap-2 transition-all ${
                       active 
-                        ? "border-[#A0BE1B] bg-[#A0BE1B]/10 text-[#1D1D1F] font-bold shadow-sm ring-2 ring-[#A0BE1B]/20" 
-                        : "border-gray-200 hover:border-gray-300 text-[#6E6E73] bg-gray-50/50"
+                        ? "border-[#1D1D1F] bg-gray-50 shadow-md ring-2 ring-[#A0BE1B]" 
+                        : "border-gray-200 hover:border-gray-300 text-[#6E6E73] bg-white"
                     }`}
                   >
-                    <div className={`p-2 rounded-xl ${type.color}`}>
-                      <Icon className="w-5 h-5" />
+                    <div className={`p-3 rounded-2xl shadow-sm ${type.bgClass} flex items-center justify-center`}>
+                      <Icon className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] text-center leading-tight font-medium">{type.name}</span>
+                    <span className="text-[11px] text-center leading-tight font-bold text-[#1D1D1F]">{type.name}</span>
                   </button>
                 );
               })}
@@ -232,8 +225,7 @@ export default function CrearQRPage() {
               Configuración para: <span className="text-[#A0BE1B] uppercase">{contentType}</span>
             </h2>
 
-            {/* URL / OTROS LINKS */}
-            {["url", "app", "youtube", "instagram", "facebook", "telegram", "map", "audio", "booking", "dynamic"].includes(contentType) && (
+            {["url", "app", "youtube", "instagram", "facebook", "twitter", "telegram", "map", "audio", "booking", "dynamic"].includes(contentType) && (
               <div>
                 <label className="block text-xs font-semibold text-[#1D1D1F] mb-1.5 select-none cursor-default">Enlace o URL de destino</label>
                 <input
@@ -241,12 +233,11 @@ export default function CrearQRPage() {
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
                   placeholder="https://tu-sitio.com"
-                  className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] focus:ring-2 focus:ring-[#A0BE1B]/10 bg-gray-50/50 text-[#1D1D1F]"
+                  className="w-full px-4 py-3.5 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-[#A0BE1B] bg-gray-50/50 text-[#1D1D1F]"
                 />
               </div>
             )}
 
-            {/* PDF UPLOAD (Max 2MB -> Supabase) */}
             {contentType === "pdf" && (
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu documento PDF (Máx. 2 MB)</label>
@@ -262,14 +253,13 @@ export default function CrearQRPage() {
                     <p className="text-xs font-bold text-[#1D1D1F]">
                       {uploadedFile ? uploadedFile.name : "Haz clic o arrastra tu archivo PDF aquí"}
                     </p>
-                    <span className="text-[10px] text-[#6E6E73]">Almacenamiento seguro en Supabase</span>
+                    <span className="text-[10px] text-[#6E6E73]">Almacenamiento en Supabase</span>
                   </div>
                 </div>
                 {fileUploadError && <p className="text-xs text-red-500 font-medium">{fileUploadError}</p>}
               </div>
             )}
 
-            {/* IMAGEN UPLOAD (Max 2MB -> Supabase) */}
             {contentType === "image" && (
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu Imagen (Máx. 2 MB)</label>
@@ -292,7 +282,6 @@ export default function CrearQRPage() {
               </div>
             )}
 
-            {/* PPTX UPLOAD (Max 3MB -> Supabase) */}
             {contentType === "pptx" && (
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-[#1D1D1F] select-none cursor-default">Sube tu presentación PowerPoint (Máx. 3 MB)</label>
@@ -308,7 +297,7 @@ export default function CrearQRPage() {
                     <p className="text-xs font-bold text-[#1D1D1F]">
                       {uploadedFile ? uploadedFile.name : "Haz clic o arrastra tu archivo PPTX aquí"}
                     </p>
-                    <span className="text-[10px] text-[#6E6E73]">Soporte nativo para presentaciones</span>
+                    <span className="text-[10px] text-[#6E6E73]">Soporte para presentaciones</span>
                   </div>
                 </div>
                 {fileUploadError && <p className="text-xs text-red-500 font-medium">{fileUploadError}</p>}
@@ -764,7 +753,6 @@ export default function CrearQRPage() {
             )}
           </div>
 
-          {/* BOTÓN DE GENERAR CÓDIGO QR */}
           {!isGenerated && !isGenerating && (
             <button
               onClick={handleGenerateQR}
@@ -774,7 +762,6 @@ export default function CrearQRPage() {
             </button>
           )}
 
-          {/* BOTÓN DE DESCARGAR */}
           <button
             onClick={handleDownloadAction}
             className={`w-full py-4 rounded-full font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg ${
@@ -796,7 +783,6 @@ export default function CrearQRPage() {
             </button>
           )}
 
-          {/* VENTANA EMERGENTE (MODAL) DE PAGO ÚNICAMENTE SI REQQUIERE LICENCIA PRO */}
           {showPaymentModal && (
             <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in select-none">
               <div className="bg-white max-w-md w-full p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 text-center space-y-6">
@@ -811,7 +797,6 @@ export default function CrearQRPage() {
                   </p>
                 </div>
 
-                {/* BOTÓN PAYPAL OFICIAL */}
                 <div className="pt-2">
                   <PayPalButtons 
                     style={{ layout: "vertical", shape: "rect", label: "pay" }}
